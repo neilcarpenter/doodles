@@ -114,14 +114,6 @@ class InteractiveBg extends AbstractView
 
 		null
 
-	createLayers : =>
-
-		for layer, name of InteractiveBgConfig.layers
-			@layers[name] = new PIXI.DisplayObjectContainer
-			@stage.addChild @layers[name]
-
-		null
-
 	createStageFilters : =>
 
 		@filters.blur  = new PIXI.BlurFilter
@@ -152,7 +144,9 @@ class InteractiveBg extends AbstractView
 
 		InteractiveShapeCache.createCache()
 
-		@createLayers()
+		@container = new PIXI.DisplayObjectContainer
+		@stage.addChild @container
+
 		@createStageFilters()
 
 		if @DEBUG
@@ -202,6 +196,30 @@ class InteractiveBg extends AbstractView
 
 		null
 
+	addShapes : (count) =>
+
+		for i in [0...count]
+
+			shape  = new AbstractShape @
+
+			@_positionShape shape
+
+			@container.addChild shape.getSprite()
+
+			@shapes.push shape
+
+		null
+
+	_positionShape : (shape) =>
+
+		pos = @_getShapeStartPos()
+
+		sprite            = shape.getSprite()
+		sprite.position.x = sprite._position.x = pos.x
+		sprite.position.y = sprite._position.y = pos.y
+
+		null
+
 	_getShapeStartPos : =>
 
 		x = (NumberUtils.getRandomFloat @w3, @w) + (@w3*2)
@@ -211,21 +229,30 @@ class InteractiveBg extends AbstractView
 
 	_getShapeCount : =>
 
-		count = 0
-		(count+=displayContainer.children.length) for layer, displayContainer of @layers
+		@container.children.length
 
-		count
+	onShapeDie : (shape) =>
+
+		if @_getShapeCount() > InteractiveBgConfig.general.MAX_SHAPE_COUNT
+			@removeShape shape
+		else
+			@resetShape shape
+
+		null
+
+	resetShape : (shape) =>
+
+		shape.reset()
+		@_positionShape shape
+
+		null
 
 	removeShape : (shape) =>
 
 		index = @shapes.indexOf shape
-		# @shapes.splice index, 1
 		@shapes[index] = null
 
-		layerParent = @layers[shape.getLayer()]
-		layerParent.removeChild shape.s
-
-		if @_getShapeCount() < InteractiveBgConfig.general.MAX_SHAPE_COUNT then @addShapes 1
+		@container.removeChild shape.getSprite()
 
 		null
 
@@ -237,7 +264,7 @@ class InteractiveBg extends AbstractView
 
 		@counter++
 
-		if (@counter % 4 is 0) and (@_getShapeCount() < InteractiveBgConfig.general.MAX_SHAPE_COUNT) then @addShapes 1
+		if (@_getShapeCount() < InteractiveBgConfig.general.MAX_SHAPE_COUNT) then @addShapes 1
 
 		@updateShapes()
 		@render()
@@ -272,7 +299,7 @@ class InteractiveBg extends AbstractView
 		@NC().appView.$window.on 'mousemove', @onMouseMove
 
 		@NC().appView.on @NC().appView.EVENT_UPDATE_DIMENSIONS, @setDims
-		@on @EVENT_KILL_SHAPE, @removeShape
+		@on @EVENT_KILL_SHAPE, @onShapeDie
 
 		null
 

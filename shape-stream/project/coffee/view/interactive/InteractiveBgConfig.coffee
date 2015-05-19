@@ -53,12 +53,12 @@ class InteractiveBgConfig
 		]
 
 	@palettes      : 'flat' : 'FLAT', 'b&w' : 'BW', 'red' : 'RED', 'blue' : 'BLUE', 'green' : 'GREEN', 'yellow' : 'YELLOW'
-	@activePalette : 'FLAT'
+	@activePalette : 'BW'
 
 	@shapeTypes: [
 		{
 			type   : 'Circle'
-			active : true
+			active : false
 		}
 		{
 			type   : 'Square'
@@ -66,7 +66,7 @@ class InteractiveBgConfig
 		}
 		{
 			type   : 'Triangle'
-			active : true
+			active : false
 		}
 	]
 
@@ -91,10 +91,10 @@ class InteractiveBgConfig
 		MAX_BLUR : 10
 
 	@general : 
-		GLOBAL_SPEED        : 1
-		GLOBAL_ALPHA        : 0.7
-		MAX_SHAPE_COUNT     : 200
-		INITIAL_SHAPE_COUNT : 10
+		GLOBAL_SPEED        : 4
+		GLOBAL_ALPHA        : 0.75
+		MAX_SHAPE_COUNT     : 700
+		INITIAL_SHAPE_COUNT : 100
 		DIRECTION_RATIO     : x : 1, y : 1
 
 	@layers :
@@ -104,7 +104,7 @@ class InteractiveBgConfig
 
 	@filters :
 		blur  : false
-		RGB   : false
+		RGB   : true
 		pixel : false
 
 	@filterDefaults :

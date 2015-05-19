@@ -27,6 +27,12 @@ class AbstractShape
 
 		_.extend @, Backbone.Events
 
+		@setProps true
+
+		return null
+
+	setProps : (firstInit=false) =>
+
 		@_shape = InteractiveBgConfig.getRandomShape()
 		@_color = InteractiveBgConfig.getRandomColor()
 
@@ -36,10 +42,10 @@ class AbstractShape
 		@speedRotate = @_getSpeedRotate()
 		@alphaValue  = @_getAlphaValue()
 
-		# @_positionVarianceX = @["_positionVariance_"+_.random(1,4)]
-		# @_positionVarianceY = @["_positionVariance_"+_.random(1,4)]
-
-		@s = new PIXI.Sprite.fromImage InteractiveShapeCache.shapes[@_shape][@_color]
+		if firstInit
+			@s = new PIXI.Sprite InteractiveShapeCache.shapes[@_shape][@_color]
+		else
+			@s.setTexture InteractiveShapeCache.shapes[@_shape][@_color]
 
 		@s.width     = @width
 		@s.height    = @height
@@ -50,7 +56,14 @@ class AbstractShape
 		# track natural, non-displaced positioning
 		@s._position = x : 0, y : 0
 
-		return null
+		null
+
+	reset : =>
+
+		@setProps()
+		@dead = false
+
+		null
 
 	_getWidth : =>
 
@@ -144,17 +157,6 @@ class AbstractShape
 	getSprite : =>
 
 		return @s
-
-	getLayer : =>
-
-		range = InteractiveBgConfig.shapes.MAX_WIDTH - InteractiveBgConfig.shapes.MIN_WIDTH
-
-		layer = switch true
-			when @width < (range / 3)+InteractiveBgConfig.shapes.MIN_WIDTH then InteractiveBgConfig.layers.BACKGROUND
-			when @width < ((range / 3) * 2)+InteractiveBgConfig.shapes.MIN_WIDTH then InteractiveBgConfig.layers.MIDGROUND
-			else InteractiveBgConfig.layers.FOREGROUND
-
-		layer
 
 	NC : =>
 
