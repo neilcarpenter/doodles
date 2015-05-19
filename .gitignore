@@ -1,0 +1,6 @@
+node_modules/
+.sass-cache/
+.sublime/
+
+# OSX 
+*.DS_Store
