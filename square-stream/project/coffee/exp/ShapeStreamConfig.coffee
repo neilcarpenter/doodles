@@ -1,4 +1,4 @@
-class InteractiveBgConfig
+class ShapeStreamConfig
 
 	@colors :
 		# http://flatuicolors.com/
@@ -53,9 +53,10 @@ class InteractiveBgConfig
 		]
 
 	@palettes      : 'flat' : 'FLAT', 'b&w' : 'BW', 'red' : 'RED', 'blue' : 'BLUE', 'green' : 'GREEN', 'yellow' : 'YELLOW'
+	@palettesArray : [ 'FLAT', 'BW', 'RED', 'BLUE', 'GREEN', 'YELLOW' ]
 	@activePalette : 'BW'
 
-	@shapeTypes: [
+	@shapeTypes : [
 		{
 			type   : 'Circle'
 			active : false
@@ -69,6 +70,9 @@ class InteractiveBgConfig
 			active : false
 		}
 	]
+
+	@shapeTypesArray : [ 'Circle', 'Square', 'Triangle' ]
+	@activeShape : 'Square'
 
 	@shapes :
 		MIN_WIDTH_PERC : 3
@@ -91,10 +95,20 @@ class InteractiveBgConfig
 		MAX_BLUR : 10
 
 	@general : 
-		GLOBAL_SPEED        : 4
-		GLOBAL_ALPHA        : 0.75
-		MAX_SHAPE_COUNT     : 10
-		INITIAL_SHAPE_COUNT : 10
+		GLOBAL_SPEED          : 4
+		MIN_GLOBAL_SPEED      : 4
+		MAX_GLOBAL_SPEED      : 9
+		GLOBAL_SPEED_INC_RATE : 0.1
+		GLOBAL_SPEED_DEC_RATE : 0.03
+
+		GLOBAL_ALPHA          : 0.75
+		MIN_GLOBAL_ALPHA      : 0.75
+		MAX_GLOBAL_ALPHA      : 1
+		GLOBAL_ALPHA_INC_RATE : 0.005
+		GLOBAL_ALPHA_DEC_RATE : 0.001
+
+		MAX_SHAPE_COUNT     : 300
+		INITIAL_SHAPE_COUNT : 100
 		DIRECTION_RATIO     : x : 1, y : 1
 
 	@layers :
@@ -114,7 +128,7 @@ class InteractiveBgConfig
 			midground  : 0
 			background : 0
 		RGB :
-			red   : x : 2, y : 2
+			red   : x : 2, y : 2, MIN : -5, MAX : 5
 			green : x : -2, y : 2
 			blue  : x : 2, y : -2
 		pixel :
@@ -135,5 +149,24 @@ class InteractiveBgConfig
 
 		return activeShapes[_.random(0, activeShapes.length-1)].type
 
-window.InteractiveBgConfig=InteractiveBgConfig
-module.exports = InteractiveBgConfig
+	@_setNextPalette : ->
+
+		idx = @palettesArray.indexOf @activePalette
+		idx = if idx is @palettesArray.length-1 then 0 else idx+1
+
+		@activePalette = @palettesArray[idx]
+
+		null
+
+	@setNextPalette : _.debounce @_setNextPalette, 300
+
+	@setNextShape : ->
+
+		idx = @shapeTypesArray.indexOf @activeShape
+		idx = if idx is @shapeTypesArray.length-1 then 0 else idx+1
+		@activeShape = @shapeTypesArray[idx]
+
+		null
+
+window.ShapeStreamConfig=ShapeStreamConfig
+module.exports = ShapeStreamConfig

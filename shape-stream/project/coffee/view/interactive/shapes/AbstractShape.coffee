@@ -94,7 +94,8 @@ class AbstractShape
 
 	_getDisplacement : (axis) =>
 
-		return 0 unless @interactiveBg.mouse.enabled
+		return 0
+		# return 0 unless @interactiveBg.mouse.enabled
 
 		dist = @interactiveBg.mouse.pos[axis]-@s.position[axis]
 		dist = if dist < 0 then -dist else dist
