@@ -147,7 +147,7 @@ class ShapeStream
         @setStreamDirection()
 
         @shapes   = []
-        @stage    = new PIXI.Stage 0x1A1A1A
+        @stage    = new PIXI.Stage 0x111111
         @renderer = PIXI.autoDetectRenderer @w, @h, antialias : true
         @render()
 
