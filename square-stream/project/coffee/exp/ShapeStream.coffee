@@ -40,9 +40,8 @@ class ShapeStream
 
     setup : =>
 
-        @bindEvents()
-
         @onResize()
+        @bindEvents()
 
         null
 
@@ -212,7 +211,7 @@ class ShapeStream
 
         if seed > 0.5
             w = if seed > 0.7 then (@w5*4) else (@w3*2)
-            x = (NumberUtils.getRandomFloat w, @w) + seed
+            x = (NumberUtils.getRandomFloat w, @w)
             y = -ShapeStreamConfig.shapes.MAX_WIDTH
         else
             h = if seed > 0.2 then @h5 else @h3
