@@ -23,7 +23,7 @@ class AbstractShape
 
 	@triangleRatio : Math.cos(Math.PI/6)
 
-	setProps : (firstInit=false) =>
+	setProps : (firstInit=false) ->
 
 		# @_shape = ShapeStreamConfig.getRandomShape()
 		@_shape = ShapeStreamConfig.activeShape
@@ -51,18 +51,18 @@ class AbstractShape
 
 		null
 
-	reset : =>
+	reset : ->
 
 		@setProps()
 		@dead = false
 
 		null
 
-	_getWidth : =>
+	_getWidth : ->
 
 		NumberUtils.getRandomFloat ShapeStreamConfig.shapes.MIN_WIDTH, ShapeStreamConfig.shapes.MAX_WIDTH
 
-	_getHeight : (shape, width) =>
+	_getHeight : (shape, width) ->
 
 		height = switch true
 			when shape is 'Triangle' then (width * AbstractShape.triangleRatio)
@@ -70,22 +70,22 @@ class AbstractShape
 
 		height
 
-	_getSpeedMove : =>
+	_getSpeedMove : ->
 
 		NumberUtils.getRandomFloat ShapeStreamConfig.shapes.MIN_SPEED_MOVE, ShapeStreamConfig.shapes.MAX_SPEED_MOVE
 
-	_getSpeedRotate : =>
+	_getSpeedRotate : ->
 
 		NumberUtils.getRandomFloat ShapeStreamConfig.shapes.MIN_SPEED_ROTATE, ShapeStreamConfig.shapes.MAX_SPEED_ROTATE
 
-	_getAlphaValue : =>
+	_getAlphaValue : ->
 
 		range = ShapeStreamConfig.shapes.MAX_ALPHA - ShapeStreamConfig.shapes.MIN_ALPHA
 		alpha = ((@width / ShapeStreamConfig.shapes.MAX_WIDTH) * range) + ShapeStreamConfig.shapes.MIN_ALPHA
 
 		alpha
 
-	_getDisplacement : (axis) =>
+	_getDisplacement : (axis) ->
 
 		# return 0
 		return 0 unless @SS().mouse.enabled
@@ -124,7 +124,7 @@ class AbstractShape
 
 	# 	Math.sin t * 0.005 / ShapeStreamConfig.general.GLOBAL_SPEED
 
-	callAnimate : =>
+	callAnimate : ->
 
 		return unless !@dead
 
@@ -142,17 +142,17 @@ class AbstractShape
 
 		null
 
-	kill : =>
+	kill : ->
 
 		@dead = true
 
 		@SS().onShapeDie @
 
-	getSprite : =>
+	getSprite : ->
 
 		return @s
 
-	SS : =>
+	SS : ->
 
 		return window.SS
 

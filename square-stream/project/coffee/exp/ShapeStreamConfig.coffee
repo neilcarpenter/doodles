@@ -95,7 +95,7 @@ class ShapeStreamConfig
 		MAX_BLUR : 10
 
 	@general : 
-		GLOBAL_SPEED          : 4
+		GLOBAL_SPEED          : 8
 		MIN_GLOBAL_SPEED      : 4
 		MAX_GLOBAL_SPEED      : 9
 		GLOBAL_SPEED_INC_RATE : 0.1
@@ -108,7 +108,7 @@ class ShapeStreamConfig
 		GLOBAL_ALPHA_DEC_RATE : 0.001
 
 		MAX_SHAPE_COUNT     : 300
-		INITIAL_SHAPE_COUNT : 100
+		INITIAL_SHAPE_COUNT : 1
 		DIRECTION_RATIO     : x : 1, y : 1
 
 	@layers :

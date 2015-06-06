@@ -38,14 +38,14 @@ class ShapeStream
 
         return null
 
-    setup : =>
+    setup : ->
 
         @onResize()
         @bindEvents()
 
         null
 
-    addGui : =>
+    addGui : ->
 
         @gui        = new dat.GUI
         @guiFolders = {}
@@ -94,7 +94,7 @@ class ShapeStream
 
         null
 
-    addStats : =>
+    addStats : ->
 
         @stats = new Stats
         @stats.domElement.style.position = 'absolute'
@@ -104,7 +104,7 @@ class ShapeStream
 
         null
 
-    addShapeCounter : =>
+    addShapeCounter : ->
 
         @shapeCounter = document.createElement 'div'
         @shapeCounter.style.position = 'absolute'
@@ -117,29 +117,29 @@ class ShapeStream
 
         null
 
-    updateShapeCounter : =>
+    updateShapeCounter : ->
 
         @shapeCounter.innerHTML = "#{@_getShapeCount()} shapes"
 
         null
 
-    createStageFilters : =>
+    createStageFilters : ->
 
-        @filters.blur  = new PIXI.BlurFilter
+        # @filters.blur  = new PIXI.BlurFilter
         @filters.RGB   = new PIXI.RGBSplitFilter
-        @filters.pixel = new PIXI.PixelateFilter
+        # @filters.pixel = new PIXI.PixelateFilter
 
-        @filters.blur.blur = ShapeStreamConfig.filterDefaults.blur.general
+        # @filters.blur.blur = ShapeStreamConfig.filterDefaults.blur.general
 
         @filters.RGB.uniforms.red.value   = ShapeStreamConfig.filterDefaults.RGB.red
         @filters.RGB.uniforms.green.value = ShapeStreamConfig.filterDefaults.RGB.green
         @filters.RGB.uniforms.blue.value  = ShapeStreamConfig.filterDefaults.RGB.blue
 
-        @filters.pixel.uniforms.pixelSize.value = ShapeStreamConfig.filterDefaults.pixel.amount
+        # @filters.pixel.uniforms.pixelSize.value = ShapeStreamConfig.filterDefaults.pixel.amount
 
         null
 
-    init: =>
+    init: ->
 
         PIXI.dontSayHello = true
 
@@ -169,7 +169,7 @@ class ShapeStream
 
         null
 
-    draw : =>
+    draw : ->
 
         @counter = 0
 
@@ -180,7 +180,7 @@ class ShapeStream
 
         null
 
-    addShapes : (count) =>
+    addShapes : (count) ->
 
         for i in [0...count]
 
@@ -195,7 +195,7 @@ class ShapeStream
 
         null
 
-    _positionShape : (shape) =>
+    _positionShape : (shape) ->
 
         pos = @_getShapeStartPos()
 
@@ -205,7 +205,7 @@ class ShapeStream
 
         null
 
-    _getShapeStartPos : =>
+    _getShapeStartPos : ->
 
         seed = Math.random()
 
@@ -224,7 +224,7 @@ class ShapeStream
 
         @container.children.length
 
-    onShapeDie : (shape) =>
+    onShapeDie : (shape) ->
 
         if @_getShapeCount() > ShapeStreamConfig.general.MAX_SHAPE_COUNT
             @removeShape shape
@@ -233,14 +233,14 @@ class ShapeStream
 
         null
 
-    resetShape : (shape) =>
+    resetShape : (shape) ->
 
         shape.reset()
         @_positionShape shape
 
         null
 
-    removeShape : (shape) =>
+    removeShape : (shape) ->
 
         index = @shapes.indexOf shape
         @shapes[index] = null
@@ -277,13 +277,13 @@ class ShapeStream
 
         null
 
-    updateShapes : =>
+    updateShapes : ->
 
         (shape?.callAnimate()) for shape in @shapes
 
         null
 
-    updateSpeedAndAlpha : =>
+    updateSpeedAndAlpha : ->
 
         if @pointerDown
             if ShapeStreamConfig.general.GLOBAL_SPEED < ShapeStreamConfig.general.MAX_GLOBAL_SPEED
@@ -300,13 +300,13 @@ class ShapeStream
 
         null
 
-    render : =>
+    render : ->
 
         @renderer.render @stage 
 
         null
 
-    bindEvents : =>
+    bindEvents : ->
 
         downInteraction = if 'ontouchstart' of window then 'touchstart' else 'mousedown'
         upInteraction = if 'ontouchstart' of window then 'touchend' else 'mouseup'
@@ -330,7 +330,7 @@ class ShapeStream
 
         null
 
-    setDims : =>
+    setDims : ->
 
         @w3 = @w/3
         @h3 = @h/3
@@ -362,7 +362,7 @@ class ShapeStream
 
         null
 
-    setStreamDirection : =>
+    setStreamDirection : ->
 
         if @w > @h
             x = 1
@@ -389,7 +389,7 @@ class ShapeStream
 
         null
 
-    SS : =>
+    SS : ->
 
         return window.SS
 
