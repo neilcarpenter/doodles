@@ -44,10 +44,8 @@
     "watchify": "~2.0.0"
   },
   "vendor": {
-    "jquery": "jquery-2.1.0.js",
     "underscore": "underscore.js",
     "pixi": "pixi.js",
-    "dat.gui.min": "dat.gui.min.js",
     "stats": "stats.js"
   }
 }

@@ -20,19 +20,19 @@ module.exports =
 		},
 		{
 			alphabet:
-				chars   : 'etaoinshrd'.split('')
-				shuffle : true
-			bg: 0x395CAA
-			words: [ 'date', 'hind', 'shot', 'haste', 'airshot', 'shorten', 'earth', 'other', 'shine', 'trash' ]
-			radiusMultiplier: 1.5
-		},
-		{
-			alphabet:
 				chars   : 'abcdefghijklmnopqrstuvwxyz0123456789!?*()@£$%^&_-+=[]{}:;\'"\\|<>,./~`'.split('')
 				shuffle : true
 			bg: 0x000000
 			words: []
 			radiusMultiplier: 3
+		},
+		{
+			alphabet:
+				chars   : 'etaoinshrd'.split('')
+				shuffle : true
+			bg: 0x395CAA
+			words: [ 'date', 'hind', 'shot', 'haste', 'airshot', 'shorten', 'earth', 'other', 'shine', 'trash' ]
+			radiusMultiplier: 1.5
 		},
 		{
 			alphabet:

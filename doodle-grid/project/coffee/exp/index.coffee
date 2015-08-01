@@ -6,6 +6,7 @@ class Exp
 
     stage    : null
     renderer : null
+    bg       : null
 
     w : 0
     h : 0
@@ -23,12 +24,16 @@ class Exp
         circle    : null
         indicator : null
 
-    pointerDown : false
+    idleTimer     : null
+    hasInteracted : false
+    pointerDown   : false
 
     activeThemeIndex : 0
+    bgChangeCount    : 0
     themeChanging    : false
 
-    tiles : []
+    tiles       : []
+    bGsToChange : []
 
     constructor : ->
 
@@ -61,8 +66,6 @@ class Exp
 
     init: ->
 
-        console.log "init: ->", @
-
         PIXI.RESOLUTION = window.devicePixelRatio or 1
         PIXI.utils._saidHello = true
 
@@ -73,6 +76,7 @@ class Exp
         @renderer = PIXI.autoDetectRenderer @w*PIXI.RESOLUTION, @h*PIXI.RESOLUTION, rendererOpts
         @stage    = new PIXI.Container
 
+        @setupBg()
         @setupGrid()
         @setupMarker()
 
@@ -84,6 +88,8 @@ class Exp
         document.body.appendChild @renderer.view
 
         @bindEvents()
+        @playAutoAnimation()
+
         @draw()
 
         null
@@ -107,6 +113,7 @@ class Exp
         # @counter++
 
         @updateMarker()
+        @updateBg()
         @updateGrid()
 
         @render()
@@ -143,12 +150,18 @@ class Exp
 
     onResize : =>
 
-        # TODO - reset grid items
-
         @w = window.innerWidth
         @h = window.innerHeight
 
         @setDims()
+
+        if @tiles.length
+            for tile, i in @tiles
+                @stage.removeChild tile.c
+                @tiles[i] = null
+            @tiles = []
+
+            @setupGrid()
 
         null
 
@@ -167,7 +180,7 @@ class Exp
 
         @activeThemeIndex = index
 
-        @renderer.backgroundColor = config.THEMES[@activeThemeIndex].bg
+        @setNewBg(@pointer.pos.x, @pointer.pos.y)
 
         @themeChanging = true
 
@@ -211,8 +224,6 @@ class Exp
 
             if @themeChanging
                 tile.setAlphabet @activeThemeIndex
-
-        if @themeChanging then @themeChanging = false
 
         null
 
@@ -367,14 +378,90 @@ class Exp
 
         null
 
-    onPointerMove : (e) =>
+    setupBg : =>
 
-        if 'ontouchstart' of window
-            x = e.originalEvent.touches[0].pageX
-            y = e.originalEvent.touches[0].pageY
-        else
-            x = e.pageX
-            y = e.pageY
+        @bg = new PIXI.Graphics
+        # @bg.beginFill 0xff0000
+        # @bg.alpha = 0.3
+        # @bg.drawRect 0, 0, @w, @w
+
+        @stage.addChild @bg
+
+        null
+
+    setNewBg : (fromX, fromY) =>
+
+        sortedTiles = @_getBgChangeTiles(fromX, fromY)
+
+        for tile in sortedTiles
+
+            @bGsToChange.push(
+                x  : tile.x
+                y  : tile.y
+                w  : tile.w
+                bg : config.THEMES[@activeThemeIndex].bg
+            )
+
+        null
+
+    _getBgChangeTiles : (fromX, fromY) =>
+
+        changer = @bgChangeCount % 3
+
+        # if changer is 0
+        #     tiles = _.sortBy _.shuffle(@tiles.slice(0)), (tile) => return tile.t.alpha
+        # else if changer is 1
+        #     tiles = _.sortBy _.shuffle(@tiles.slice(0)), (tile) => return -1*tile.t.alpha
+        if changer is 0
+            tiles = _.shuffle(@tiles.slice(0))
+        else if changer is 1
+            tiles = _.sortBy @tiles.slice(0), (tile) => return eDist [fromX, fromY], [tile.centre.x, tile.centre.y]
+        else if changer is 2
+            tiles = _.sortBy @tiles.slice(0), (tile) => return -1*eDist [fromX, fromY], [tile.centre.x, tile.centre.y]
+        # else if changer is 5
+        #     tiles = _.sortBy _.shuffle(@tiles.slice(0)), (tile) => return tile.t.x
+        # else if changer is 6
+        #     tiles = _.sortBy _.shuffle(@tiles.slice(0)), (tile) => return -1*tile.t.x
+        # else if changer is 7
+        #     tiles = _.sortBy _.shuffle(@tiles.slice(0)), (tile) => return tile.t.y
+        # else if changer is 8
+        #     tiles = _.sortBy _.shuffle(@tiles.slice(0)), (tile) => return -1*tile.t.y
+
+        @bgChangeCount++
+
+        tiles
+
+    updateBg : =>
+
+        return unless @bGsToChange.length
+
+        toChange = Math.floor(@bGsToChange.length * 0.1)
+
+        if toChange < 10
+            toChange = 10
+            @themeChanging = false
+
+        tiles        = @bGsToChange.slice(0, toChange)
+        @bGsToChange = @bGsToChange.slice(toChange)
+
+        for tile in tiles
+            @bg.beginFill tile.bg
+            @bg.drawRect tile.x, tile.y, tile.w, tile.w
+
+        null
+
+    onPointerMove : (e, x=null, y=null) =>
+
+        if e
+
+            @hasInteracted = true
+
+            if 'ontouchstart' of window
+                x = e.originalEvent.touches[0].pageX
+                y = e.originalEvent.touches[0].pageY
+            else
+                x = e.pageX
+                y = e.pageY
 
         if @pointer.pos then @pointer.last = x : @pointer.pos.x, y : @pointer.pos.y
 
@@ -392,6 +479,12 @@ class Exp
         else
             @pointer.delta = x : 0, y : 0
 
+        clearTimeout @idleTimer
+        @idleTimer = setTimeout =>
+            @hasInteracted = false
+            @playAutoAnimation()
+        , 3000
+
         null
 
     onPointerDown : =>
@@ -404,6 +497,24 @@ class Exp
 
         @pointerDown = false
         @setTheme()
+
+        null
+
+    playAutoAnimation : =>
+
+        randX = _.random(@w*0.05, @w*0.95)
+        randY = _.random(@h*0.05, @h*0.95)
+        delay = _.random(100, 400)
+
+        @onPointerMove null, randX, randY
+
+        chance = Math.random()
+
+        if chance < 0.02
+            @setTheme()
+
+        if !@hasInteracted
+            setTimeout @playAutoAnimation, delay
 
         null
 
