@@ -12,6 +12,10 @@ class Exp
     cols : null
     rows : null
 
+    marker :
+        pos    : x : 0, y : 0
+        circle : null
+
     pointer :
         pos   : null
         last  : null
@@ -23,7 +27,7 @@ class Exp
 
     constructor : ->
 
-        @DEBUG = true
+        @DEBUG = /\?debug/.test(window.location.search)
 
         @$window = $(window)
         @$el     = $('#exp')
@@ -63,14 +67,26 @@ class Exp
 
         @setDims()
 
-        @renderer = PIXI.autoDetectRenderer @w, @h, antialias : true, backgroundColor : 0xEB423E
+        @renderer = PIXI.autoDetectRenderer @w*2, @h*2, antialias : true, backgroundColor : 0xEB423E, resolution : window.devicePixelRatio or 1
         @stage = new PIXI.Container
         @setupGrid()
 
         @render()
 
+        @marker.pos.x = @w/2
+        @marker.pos.y = @h/2
+
         if @DEBUG
             @addStats()
+
+            @marker.circle = new PIXI.Graphics
+            @marker.circle.beginFill(0xffffff)
+            @marker.circle.drawCircle(0, 0, 10)
+            @stage.addChild @marker.circle
+            @marker.circle.x = @marker.pos.x
+            @marker.circle.y = @marker.pos.y
+
+            @marker.circle.visible = true
 
         @$el.append @renderer.view
 
@@ -96,6 +112,7 @@ class Exp
 
         # @counter++
 
+        @updateMarker()
         @updateGrid()
 
         @render()
@@ -180,22 +197,22 @@ class Exp
 
             tile.update()
 
-            hChars.push tile.t.text
-            vChars[ (i % @cols) + Math.floor(i / @cols) ] = tile.t.text
+        #     hChars.push tile.t.text
+        #     vChars[ (i % @cols) + Math.floor(i / @cols) ] = tile.t.text
 
-        if hChars.join('').indexOf(config.WORD) > -1 or hChars.reverse().join('').indexOf(config.WORD) > -1 or vChars.join('').indexOf(config.WORD) > -1 or vChars.reverse().join('').indexOf(config.WORD) > -1
-            window.STOP = 1
+        # if hChars.join('').indexOf(config.WORD) > -1 or hChars.reverse().join('').indexOf(config.WORD) > -1 or vChars.join('').indexOf(config.WORD) > -1 or vChars.reverse().join('').indexOf(config.WORD) > -1
+        #     window.STOP = 1
 
-        console.log "L-R", hChars.join('').indexOf(config.WORD)
-        console.log "R-L", hChars.reverse().join('').indexOf(config.WORD)
-        console.log "T-B", vChars.join('').indexOf(config.WORD)
-        console.log "B-T", vChars.reverse().join('').indexOf(config.WORD)
+        # console.log "L-R", hChars.join('').indexOf(config.WORD)
+        # console.log "R-L", hChars.reverse().join('').indexOf(config.WORD)
+        # console.log "T-B", vChars.join('').indexOf(config.WORD)
+        # console.log "B-T", vChars.reverse().join('').indexOf(config.WORD)
 
         null
 
     _getIndexes : ->
 
-        closestIndex = (Math.floor(@pointer.pos.x / config.TILE_WIDTH)) + ((Math.floor(@pointer.pos.y / config.TILE_WIDTH)) * @cols)-@cols
+        closestIndex = (Math.floor(@marker.pos.x / config.TILE_WIDTH)) + ((Math.floor(@marker.pos.y / config.TILE_WIDTH)) * @cols)-@cols
         delta        = Math.max(Math.abs(@pointer.delta.x), Math.abs(@pointer.delta.y))
 
         indexes = [ closestIndex ]
@@ -238,6 +255,22 @@ class Exp
 
         indexes
 
+    updateMarker : =>
+
+        return unless @pointer.pos
+
+        xD = @pointer.pos.x - @marker.pos.x
+        yD = @pointer.pos.y - @marker.pos.y
+
+        @marker.pos.x += (xD * 0.1)
+        @marker.pos.y += (yD * 0.1)
+
+        if @DEBUG
+            @marker.circle.x = @marker.pos.x
+            @marker.circle.y = @marker.pos.y
+
+        null
+
     onPointerMove : (e) =>
 
         if 'ontouchstart' of window
@@ -252,7 +285,14 @@ class Exp
         @pointer.pos  = x : x, y : y
 
         if @pointer.last
-            @pointer.delta = x : @pointer.pos.x - @pointer.last.x, y : @pointer.pos.y - @pointer.last.y
+            newDX = @pointer.pos.x - @pointer.last.x
+            newDY = @pointer.pos.y - @pointer.last.y
+            if Math.max(Math.abs(newDX), Math.abs(newDY)) > Math.max(Math.abs(@pointer.delta.x), Math.abs(@pointer.delta.y))
+                @pointer.delta = x : @pointer.pos.x - @pointer.last.x, y : @pointer.pos.y - @pointer.last.y
+            else
+                @pointer.delta.x *= 0.98
+                @pointer.delta.y *= 0.98
+
         else
             @pointer.delta = x : 0, y : 0
 

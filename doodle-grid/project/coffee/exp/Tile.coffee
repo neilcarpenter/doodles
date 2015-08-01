@@ -16,8 +16,14 @@ class Tile
 
 	charsToShow : 0
 
-	# alphabet : 'abcdefghijklmnopqrstuvwxyz0123456789!?*()@£$%^&_-+=[]{}:;\'"\\|<>,./~`'
-	# alphabet : 'codedoodl.es'
+	alphabet : 'abcdefghijklmnopqrstuvwxyz0123456789!?*()@£$%^&_-+=[]{}:;\'"\\|<>,./~`'
+
+	###
+	alphabet options
+	- codedoodl.es
+	- normal transitioner
+	- normal transitioner (shuffled)
+	###
 
 	constructor : ({@x, @y, @w}) ->
 

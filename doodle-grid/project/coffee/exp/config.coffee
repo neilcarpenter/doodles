@@ -1,4 +1,4 @@
 module.exports =
 
-	TILE_WIDTH: 20
+	TILE_WIDTH: 16
 	WORD: 'codedoodl.es'
