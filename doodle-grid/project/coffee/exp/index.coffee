@@ -1,5 +1,6 @@
 Tile   = require './Tile'
 config = require './config'
+eDist  = require 'euclidean-distance'
 
 class Exp
 
@@ -12,16 +13,20 @@ class Exp
     cols : null
     rows : null
 
-    marker :
-        pos    : x : 0, y : 0
-        circle : null
-
     pointer :
         pos   : null
         last  : null
         delta : null
 
+    marker :
+        pos    : x : 0, y : 0
+        circle    : null
+        indicator : null
+
     pointerDown : false
+
+    activeThemeIndex : 0
+    themeChanging    : false
 
     tiles : []
 
@@ -63,26 +68,18 @@ class Exp
 
         @setDims()
 
-        @renderer = PIXI.autoDetectRenderer @w*2, @h*2, antialias : true, backgroundColor : 0xEB423E, resolution : window.devicePixelRatio or 1
-        @stage = new PIXI.Container
+        rendererOpts = antialias : true, backgroundColor : config.THEMES[@activeThemeIndex].bg, resolution : PIXI.RESOLUTION
+
+        @renderer = PIXI.autoDetectRenderer @w*PIXI.RESOLUTION, @h*PIXI.RESOLUTION, rendererOpts
+        @stage    = new PIXI.Container
+
         @setupGrid()
+        @setupMarker()
 
         @render()
 
-        @marker.pos.x = @w/2
-        @marker.pos.y = @h/2
-
         if @DEBUG
             @addStats()
-
-            @marker.circle = new PIXI.Graphics
-            @marker.circle.beginFill(0xffffff)
-            @marker.circle.drawCircle(0, 0, 10)
-            @stage.addChild @marker.circle
-            @marker.circle.x = @marker.pos.x
-            @marker.circle.y = @marker.pos.y
-
-            @marker.circle.visible = true
 
         document.body.appendChild @renderer.view
 
@@ -161,6 +158,21 @@ class Exp
 
         null
 
+    setTheme : (index=null) ->
+
+        return if @themeChanging
+
+        if !index
+            index = if @activeThemeIndex is config.THEMES.length-1 then @activeThemeIndex = 0 else @activeThemeIndex+1
+
+        @activeThemeIndex = index
+
+        @renderer.backgroundColor = config.THEMES[@activeThemeIndex].bg
+
+        @themeChanging = true
+
+        null
+
     setupGrid : ->
 
         @cols = Math.ceil @w / config.TILE_WIDTH
@@ -185,73 +197,148 @@ class Exp
         return unless @pointer.pos
 
         indexes = @_getIndexes()
-        for index in indexes
+        for item in indexes
 
-            @tiles[index]?.charsToShow = 10
+            @tiles[item.index]?.charsToShow = item.chars
 
-        hChars = []
-        vChars = Array.apply(null, Array(@tiles.length)).map((x, i) -> return ' ' )
+        # if config.THEMES[@activeThemeIndex].words.length
+
+        #     @_checkForWords()
+
         for tile, i in @tiles
 
             tile.update()
 
-        #     hChars.push tile.t.text
-        #     vChars[ (i % @cols) + Math.floor(i / @cols) ] = tile.t.text
+            if @themeChanging
+                tile.setAlphabet @activeThemeIndex
 
-        # if hChars.join('').indexOf(config.WORD) > -1 or hChars.reverse().join('').indexOf(config.WORD) > -1 or vChars.join('').indexOf(config.WORD) > -1 or vChars.reverse().join('').indexOf(config.WORD) > -1
-        #     window.STOP = 1
-
-        # console.log "L-R", hChars.join('').indexOf(config.WORD)
-        # console.log "R-L", hChars.reverse().join('').indexOf(config.WORD)
-        # console.log "T-B", vChars.join('').indexOf(config.WORD)
-        # console.log "B-T", vChars.reverse().join('').indexOf(config.WORD)
+        if @themeChanging then @themeChanging = false
 
         null
 
     _getIndexes : ->
 
-        closestIndex = (Math.floor(@marker.pos.x / config.TILE_WIDTH)) + ((Math.floor(@marker.pos.y / config.TILE_WIDTH)) * @cols)-@cols
-        delta        = Math.max(Math.abs(@pointer.delta.x), Math.abs(@pointer.delta.y))
+        indexes = []
 
-        indexes = [ closestIndex ]
+        for tile, index in @tiles
 
-        if delta > 50
-            indexes.push(
-                closestIndex - 1,
-                closestIndex + 1,
-                closestIndex - @cols,
-                closestIndex + @cols
-            )
+            if @marker.circle.contains tile.centre.x, tile.centre.y
 
-        if delta > 80
-            indexes.push(
-                closestIndex - 2,
-                closestIndex + 2,
-                closestIndex - @cols-1,
-                closestIndex - @cols+1,
-                closestIndex + @cols-1,
-                closestIndex + @cols+1,
-                closestIndex - @cols*2,
-                closestIndex + @cols*2
-            )
+                dist  = eDist [@marker.circle.x, @marker.circle.y], [tile.centre.x, tile.centre.y]
+                dist = Math.min dist, @marker.circle.radius
 
-        if delta > 120
-            indexes.push(
-                closestIndex - 3,
-                closestIndex + 3,
-                closestIndex - @cols-2,
-                closestIndex - @cols+2,
-                closestIndex + @cols-2,
-                closestIndex + @cols+2,
-                closestIndex - (@cols*2)-1,
-                closestIndex - (@cols*2)+1,
-                closestIndex + (@cols*2)-1,
-                closestIndex + (@cols*2)+1,
-                closestIndex - @cols*3,
-                closestIndex + @cols*3
-            )
+                chars = config.MAX_CHARS_TO_SHOW - Math.floor((dist / @marker.circle.radius) * config.MAX_CHARS_TO_SHOW)
+                chars += config.MIN_CHARS_TO_SHOW
+
+                indexes.push { index, chars }
 
         indexes
+
+    # _checkForWords : ->
+
+    #     hChars = []
+    #     hTiles = []
+    #     vChars = []
+    #     vTiles = []
+
+    #     for tile, i in @tiles
+
+    #         hChars.push tile.t.text
+    #         hTiles.push tile
+
+    #         vIndex = (i % @cols) * @rows + Math.floor(i / @rows)
+    #         vChars[vIndex] = tile.t.text
+    #         vTiles[vIndex] = tile
+
+    #     found = []
+
+    #     for word in config.THEMES[@activeThemeIndex].words
+
+    #         L2RStr = hChars.join('')
+    #         R2LStr = hChars.reverse().join('')
+    #         T2BStr = vChars.join('')
+    #         B2TStr = vChars.reverse().join('')
+
+    #         if L2RStr.indexOf(word) > -1
+    #             # console.log "L->R", hTiles[L2RStr.indexOf(word)]
+    #             indices = @_getFoundIndices word, L2RStr
+    #             for index in indices
+    #                 found.push @_captureFoundWord hTiles, index, word
+
+    #         # if R2LStr.indexOf(word) > -1
+    #             # console.log "R->L", hTiles.reverse()[R2LStr.indexOf(word)]
+    #             # indices = @_getFoundIndices word, R2LStr
+    #             # for index in indices
+    #             #     found.push @_captureFoundWord hTiles.reverse(), index, word
+
+    #         if T2BStr.indexOf(word) > -1
+    #             # console.log "T->B", vTiles[T2BStr.indexOf(word)]
+    #             indices = @_getFoundIndices word, T2BStr
+    #             for index in indices
+    #                 found.push @_captureFoundWord vTiles, index, word
+
+    #         # if B2TStr.indexOf(word) > -1
+    #             # console.log "B->T", vTiles.reverse()[B2TStr.indexOf(word)]
+    #             # found = true
+
+    #         # if L2RStr.indexOf(word) > -1 or R2LStr.indexOf(word) > -1 or T2BStr.indexOf(word) > -1 or B2TStr.indexOf(word) > -1
+    #             # console.log word + ' :)'
+    #             # found = true
+
+    #         for foundWord in found
+
+    #             for char in foundWord
+
+    #                 if !char.item.FOUND
+    #                     char.item.setFoundChar char.char
+
+    #     null
+
+    # _getFoundIndices : (searchStr, str) ->
+
+    #     startIndex   = 0
+    #     indices      = []
+    #     searchStrLen = searchStr.length
+
+    #     while (index = str.indexOf(searchStr, startIndex)) > -1
+    #         indices.push(index)
+    #         startIndex = index + searchStrLen
+
+    #     indices
+
+    # _captureFoundWord : (itemArray, index, word) ->
+
+    #     foundWord = []
+
+    #     for item, i in itemArray.slice index, index+word.length
+
+    #         foundWord.push
+    #             item : item
+    #             char : word.charAt i
+
+
+    #     foundWord
+
+    setupMarker : =>
+
+        @marker.pos.x = @w/2
+        @marker.pos.y = @h/2
+
+        @marker.circle = new PIXI.Circle @w/2, @h/2, 0
+
+        if @DEBUG
+            @addStats()
+
+            @marker.indicator = new PIXI.Graphics
+            @marker.indicator.beginFill(0xffffff)
+            @marker.indicator.drawCircle(0, 0, 10)
+            @stage.addChild @marker.indicator
+            @marker.indicator.x = @marker.pos.x
+            @marker.indicator.y = @marker.pos.y
+
+            @marker.indicator.visible = true
+
+        null
 
     updateMarker : =>
 
@@ -263,9 +350,20 @@ class Exp
         @marker.pos.x += (xD * 0.1)
         @marker.pos.y += (yD * 0.1)
 
+        @marker.circle.x = @marker.pos.x
+        @marker.circle.y = @marker.pos.y
+
+        delta  = Math.max(Math.abs(@pointer.delta.x), Math.abs(@pointer.delta.y))
+        radius = (((Math.min((delta / config.MAX_DELTA)*100, config.MAX_DELTA)) / 100) * config.MAX_RADIUS) + config.MIN_RADIUS
+        radius = radius * config.THEMES[@activeThemeIndex].radiusMultiplier
+
+        @marker.circle.radius = radius
+        @pointer.delta.x *= 0.98
+        @pointer.delta.y *= 0.98
+
         if @DEBUG
-            @marker.circle.x = @marker.pos.x
-            @marker.circle.y = @marker.pos.y
+            @marker.indicator.x = @marker.pos.x
+            @marker.indicator.y = @marker.pos.y
 
         null
 
@@ -305,6 +403,7 @@ class Exp
     onPointerUp : =>
 
         @pointerDown = false
+        @setTheme()
 
         null
 

@@ -4,7 +4,7 @@ class Tile
 
 	x: null
 	y: null
-	w: null
+	w: null	
 
 	tX: null
 	tY: null
@@ -12,34 +12,26 @@ class Tile
 	c: null
 	t: null
 
+	centre : null
 	chance : 0.9
 
 	charsToShow : 0
 
-	alphabet : 'abcdefghijklmnopqrstuvwxyz0123456789!?*()@£$%^&_-+=[]{}:;\'"\\|<>,./~`'
+	# FOUND : false
 
-	###
-	alphabet options
-	- codedoodl.es
-	- normal transitioner
-	- normal transitioner (shuffled)
-	###
+	opts : font : '18px font', fill : 0xffffff
 
 	constructor : ({@x, @y, @w}) ->
 
-		@chars       = _.shuffle(config.WORD.split(''))
-		@charCounter = 0
-		# char = 'n'
-
-		opts = font : '18px font', fill : 0xffffff, align : 'center'
+		@centre =  x: @x + @w/2, y: @y + @w/2
 
 		@c = new PIXI.Container
 		@c.width = @c.height = @w
 
-		@t = new PIXI.extras.BitmapText ' ', opts
+		@t = new PIXI.extras.BitmapText ' ', @opts
 		bounds = @t.getLocalBounds()
-		@tX = @x + (@w/2) - (bounds.width/2) - bounds.x
-		@tY = @y + (@w/2) - (bounds.height/2) - bounds.y - 10 # why this 10? don't know
+		@tX = @centre.x - (bounds.width/2) - bounds.x
+		@tY = @centre.y - (bounds.height/2) - bounds.y - 10 # why this 10? don't know
 		@t.position.set @tX, @tY
 		
 		# @b = new PIXI.Graphics
@@ -49,6 +41,8 @@ class Tile
 
 		# @c.addChild @b
 		@c.addChild @t
+
+		@setAlphabet()
 
 		return null
 
@@ -60,16 +54,44 @@ class Tile
 
 		char
 
+	setAlphabet : (themeIndex=0) ->
+
+		@chars = config.THEMES[themeIndex].alphabet.chars
+		@chars = if config.THEMES[themeIndex].alphabet.shuffle then _.shuffle @chars else @chars
+
+		@charCounter = 0
+
+		null
+
+	# setFoundChar : (char) ->
+
+	# 	@t.text = char
+	# 	@t.alpha = 1
+
+	# 	@FOUND = true
+
+	# 	setTimeout =>
+	# 		@FOUND = false
+	# 		@charsToShow = config.MAX_CHARS_TO_SHOW
+	# 		@update()
+	# 	, 1000
+
+	# 	null
+
 	update : ->
 
+		# return unless @charsToShow > 0 and !@FOUND
 		return unless @charsToShow > 0
 
 		if Math.random() > @chance
 
 			char = if @charsToShow is 1 then ' ' else @_getNewChar()
 
-			@t.text = char
-			@t.alpha = @charsToShow / 10
+			avChar = (config.MIN_CHARS_TO_SHOW + config.MAX_CHARS_TO_SHOW) / 2
+			alpha  = Math.min @charsToShow / avChar, 1
+
+			@t.text  = char
+			@t.alpha = alpha
 
 			@charsToShow--
 
