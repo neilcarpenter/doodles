@@ -510,7 +510,7 @@ class Exp
 
         chance = Math.random()
 
-        if chance < 0.02
+        if chance < 0.01
             @setTheme()
 
         if !@hasInteracted
