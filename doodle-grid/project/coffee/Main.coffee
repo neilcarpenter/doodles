@@ -1,3 +1,3 @@
 Exp = require './exp'
 
-$ -> window.EXP = new Exp
+window.EXP = new Exp

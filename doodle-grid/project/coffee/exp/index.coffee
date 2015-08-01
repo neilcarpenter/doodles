@@ -29,9 +29,6 @@ class Exp
 
         @DEBUG = /\?debug/.test(window.location.search)
 
-        @$window = $(window)
-        @$el     = $('#exp')
-
         @setup()
 
         loader = PIXI.loader
@@ -44,7 +41,6 @@ class Exp
     setup : ->
 
         @onResize()
-        @bindEvents()
 
         null
 
@@ -88,8 +84,9 @@ class Exp
 
             @marker.circle.visible = true
 
-        @$el.append @renderer.view
+        document.body.appendChild @renderer.view
 
+        @bindEvents()
         @draw()
 
         null
@@ -138,11 +135,12 @@ class Exp
 
         @onResize = _.debounce @onResize, 300
 
-        @$window.on 'resize orientationchange', @onResize
+        window.addEventListener 'resize', @onResize, false
+        window.addEventListener 'orientationchange', @onResize, false
 
-        @$el.on moveInteraction, @onPointerMove
-        @$el.on downInteraction, @onPointerDown
-        @$el.on upInteraction, @onPointerUp
+        @renderer.view.addEventListener moveInteraction, @onPointerMove, false
+        @renderer.view.addEventListener downInteraction, @onPointerDown, false
+        @renderer.view.addEventListener upInteraction, @onPointerUp, false
 
         null
 
