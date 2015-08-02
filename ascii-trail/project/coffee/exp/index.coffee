@@ -1,5 +1,6 @@
 Tile   = require './Tile'
-config = require './config'
+Device = require '../utils/Device'
+config = require '../config'
 eDist  = require 'euclidean-distance'
 
 class Exp
@@ -153,7 +154,10 @@ class Exp
         @w = window.innerWidth
         @h = window.innerHeight
 
+        Device.setSize(@w, @h)
+
         @setDims()
+        @updateBgForce()
 
         if @tiles.length
             for tile, i in @tiles
@@ -188,17 +192,17 @@ class Exp
 
     setupGrid : ->
 
-        @cols = Math.ceil @w / config.TILE_WIDTH
-        @rows = Math.ceil @h / config.TILE_WIDTH
+        @cols = Math.ceil @w / config.TILE_WIDTH[Device.SIZE]
+        @rows = Math.ceil @h / config.TILE_WIDTH[Device.SIZE]
 
         tileCount = @cols * @rows
 
         for i in [0...tileCount]
 
-            x = ( i % @cols ) * config.TILE_WIDTH
-            y = Math.floor( i / @cols ) * config.TILE_WIDTH
+            x = ( i % @cols ) * config.TILE_WIDTH[Device.SIZE]
+            y = Math.floor( i / @cols ) * config.TILE_WIDTH[Device.SIZE]
 
-            tile = new Tile x: x, y: y, w: config.TILE_WIDTH
+            tile = new Tile x: x, y: y, w: config.TILE_WIDTH[Device.SIZE]
 
             @tiles.push tile
             @stage.addChild tile.c
@@ -450,6 +454,15 @@ class Exp
 
         null
 
+    updateBgForce : =>
+
+        return unless @bg
+
+        @bg.beginFill config.THEMES[@activeThemeIndex].bg
+        @bg.drawRect 0, 0, @w, @h
+
+        null
+
     onPointerMove : (e, x=null, y=null) =>
 
         if e
@@ -457,8 +470,8 @@ class Exp
             @hasInteracted = true
 
             if 'ontouchstart' of window
-                x = e.originalEvent.touches[0].pageX
-                y = e.originalEvent.touches[0].pageY
+                x = e.touches[0].pageX
+                y = e.touches[0].pageY
             else
                 x = e.pageX
                 y = e.pageY

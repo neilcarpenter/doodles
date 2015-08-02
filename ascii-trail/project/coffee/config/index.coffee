@@ -1,6 +1,14 @@
 module.exports =
 
-	TILE_WIDTH: 16
+	FONT_SIZE :
+		SMALL  : '10px'
+		MEDIUM : '18px'
+		LARGE  : '18px'
+
+	TILE_WIDTH :
+		SMALL  : 10
+		MEDIUM : 16
+		LARGE  : 16
 
 	MIN_RADIUS: 10
 	MAX_RADIUS: 50

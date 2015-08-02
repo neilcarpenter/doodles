@@ -1,4 +1,4 @@
-config = require './config'
+config = require '../config'
 
 class Tile
 
@@ -19,8 +19,6 @@ class Tile
 
 	# FOUND : false
 
-	opts : font : '18px font', fill : 0xffffff
-
 	constructor : ({@x, @y, @w}) ->
 
 		@centre =  x: @x + @w/2, y: @y + @w/2
@@ -28,7 +26,11 @@ class Tile
 		@c = new PIXI.Container
 		@c.width = @c.height = @w
 
-		@t = new PIXI.extras.BitmapText ' ', @opts
+		opts =
+			font : "#{config.FONT_SIZE[Device.SIZE]} font"
+			fill : 0xffffff
+
+		@t = new PIXI.extras.BitmapText ' ', opts
 		bounds = @t.getLocalBounds()
 		@tX = @centre.x - (bounds.width/2) - bounds.x
 		@tY = @centre.y - (bounds.height/2) - bounds.y - 10 # why this 10? don't know
