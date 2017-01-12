@@ -2,29 +2,33 @@ module.exports =
 
 	FONT_SIZE :
 		SMALL  : '10px'
-		MEDIUM : '18px'
-		LARGE  : '18px'
+		MEDIUM : '12px'
+		LARGE  : '12px'
 
 	TILE_WIDTH :
-		SMALL  : 10
-		MEDIUM : 16
-		LARGE  : 16
+		SMALL  : 8
+		MEDIUM : 10
+		LARGE  : 10
 
 	MIN_RADIUS: 10
 	MAX_RADIUS: 50
 	MAX_DELTA : 150
 
-	MIN_CHARS_TO_SHOW : 8
-	MAX_CHARS_TO_SHOW : 12
+	MIN_CHARS_TO_SHOW : 1
+	MAX_CHARS_TO_SHOW : 20
 
 	THEMES: [
 		{
 			alphabet:
-				chars   : 'codedoodl.es'.split('')
+				chars   : 'Museum Digital Art'.split('')
+				# chars   : 'abcdefghijklmnopqrstuvwxyz'.split('')
 				shuffle : true
-			bg: 0xEB423E
+			bg: 0xFFFFFF
 			words: [ 'code', 'doodle' ]
-			radiusMultiplier: 1
+			radiusMultiplier: 2
+			markerSpeed: 0.1
+			autoplayMinDelay: 200
+			autoplayMaxDelay: 700
 		},
 		{
 			alphabet:

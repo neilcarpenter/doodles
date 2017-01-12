@@ -43,7 +43,7 @@ class Exp
         @setup()
 
         loader = PIXI.loader
-        loader.add 'font', "fonts/monosten/font.fnt"
+        loader.add 'font', "fonts/monofonto-blue/font.fnt"
         loader.once 'complete', @init.bind(@)
         loader.load()
 
@@ -177,6 +177,8 @@ class Exp
 
     setTheme : (index=null) ->
 
+        return
+
         return if @themeChanging
 
         if !index
@@ -213,10 +215,10 @@ class Exp
 
         return unless @pointer.pos
 
-        indexes = @_getIndexes()
-        for item in indexes
+        for item in @_getIndexes()
 
-            @tiles[item.index]?.charsToShow = item.chars
+            # @tiles[item.index]?.charsToShow = item.chars
+            @tiles[item.index]?.charsToShow = Math.min (@tiles[item.index]?.charsToShow + (item.chars / 3)), config.MAX_CHARS_TO_SHOW
 
         # if config.THEMES[@activeThemeIndex].words.length
 
@@ -345,7 +347,7 @@ class Exp
             @addStats()
 
             @marker.indicator = new PIXI.Graphics
-            @marker.indicator.beginFill(0xffffff)
+            @marker.indicator.beginFill(0xffff00)
             @marker.indicator.drawCircle(0, 0, 10)
             @stage.addChild @marker.indicator
             @marker.indicator.x = @marker.pos.x
@@ -362,8 +364,8 @@ class Exp
         xD = @pointer.pos.x - @marker.pos.x
         yD = @pointer.pos.y - @marker.pos.y
 
-        @marker.pos.x += (xD * 0.1)
-        @marker.pos.y += (yD * 0.1)
+        @marker.pos.x += (xD * config.THEMES[@activeThemeIndex].markerSpeed or 0.1)
+        @marker.pos.y += (yD * config.THEMES[@activeThemeIndex].markerSpeed or 0.1)
 
         @marker.circle.x = @marker.pos.x
         @marker.circle.y = @marker.pos.y
@@ -517,7 +519,7 @@ class Exp
 
         randX = _.random(@w*0.05, @w*0.95)
         randY = _.random(@h*0.05, @h*0.95)
-        delay = _.random(100, 400)
+        delay = _.random(300, 600)
 
         @onPointerMove null, randX, randY
 

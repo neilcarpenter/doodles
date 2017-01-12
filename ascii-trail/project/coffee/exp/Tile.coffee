@@ -13,7 +13,8 @@ class Tile
 	t: null
 
 	centre : null
-	chance : 0.9
+	chance : 0.8
+	charChangeChance: 0.6
 
 	charsToShow : 0
 
@@ -35,6 +36,8 @@ class Tile
 		@tX = @centre.x - (bounds.width/2) - bounds.x
 		@tY = @centre.y - (bounds.height/2) - bounds.y - 10 # why this 10? don't know
 		@t.position.set @tX, @tY
+
+		@maxFontSize = parseInt config.FONT_SIZE[Device.SIZE], 10
 		
 		# @b = new PIXI.Graphics
 		# @b.beginFill 0xffffff
@@ -89,11 +92,14 @@ class Tile
 
 			char = if @charsToShow is 1 then ' ' else @_getNewChar()
 
-			avChar = (config.MIN_CHARS_TO_SHOW + config.MAX_CHARS_TO_SHOW) / 2
-			alpha  = Math.min @charsToShow / avChar, 1
+			# avChar = (config.MIN_CHARS_TO_SHOW + config.MAX_CHARS_TO_SHOW) / 2
+			# alpha  = Math.min @charsToShow / avChar, 1
+			alpha  = Math.min @charsToShow / config.MAX_CHARS_TO_SHOW, 1
 
-			@t.text  = char
 			@t.alpha = alpha
+			@t.font.size = Math.min (Math.ceil alpha * @maxFontSize) + (@maxFontSize / 3), @maxFontSize
+
+			if Math.random() > @charChangeChance or @charsToShow is 1 then @t.text  = char
 
 			@charsToShow--
 
