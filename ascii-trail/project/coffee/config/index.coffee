@@ -20,7 +20,7 @@ module.exports =
 	THEMES: [
 		{
 			alphabet:
-				chars   : 'codedoodl.es'.split('')
+				chars   : 'muda'.split('')
 				shuffle : true
 			bg: 0xEB423E
 			words: [ 'code', 'doodle' ]
