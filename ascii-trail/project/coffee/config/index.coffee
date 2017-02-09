@@ -20,19 +20,19 @@ module.exports =
 	THEMES: [
 		{
 			alphabet:
-				chars   : 'muda'.split('')
-				shuffle : true
-			bg: 0xEB423E
-			words: [ 'code', 'doodle' ]
-			radiusMultiplier: 1
-		},
-		{
-			alphabet:
 				chars   : 'abcdefghijklmnopqrstuvwxyz0123456789!?*()@£$%^&_-+=[]{}:;\'"\\|<>,./~`'.split('')
 				shuffle : true
 			bg: 0x000000
 			words: []
 			radiusMultiplier: 3
+		},
+		{
+			alphabet:
+				chars   : 'muda'.split('')
+				shuffle : true
+			bg: 0xEB423E
+			words: [ 'code', 'doodle' ]
+			radiusMultiplier: 1
 		},
 		{
 			alphabet:
